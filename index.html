@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Event Invitation</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background: #f5f0e8;
+    padding: 2rem;
+    color: #2c2520;
+  }
+
+  h1 {
+    text-align: center;
+    font-family: Georgia, serif;
+    font-size: 18px;
+    color: #2c2520;
+    margin-bottom: 0.5rem;
+    font-weight: normal;
+    letter-spacing: 0.05em;
+  }
+
+  .controls {
+    max-width: 760px;
+    margin: 0 auto 2rem;
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid #e0d8cc;
+    font-family: Arial, sans-serif;
+  }
+
+  .controls p {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .field-group { display: flex; flex-direction: column; gap: 4px; }
+  .field-group label { font-size: 12px; color: #888; font-family: Arial, sans-serif; }
+  .field-group input, .field-group textarea {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    color: #2c2520;
+    width: 100%;
+  }
+  .field-group textarea { min-height: 80px; resize: vertical; }
+  .full-width { grid-column: 1 / -1; }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 1rem; flex-wrap: wrap; }
+
+  button {
+    padding: 9px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    border: 1px solid #c8b89a;
+    background: #f5f0e8;
+    color: #2c2520;
+    transition: background 0.15s;
+  }
+  button:hover { background: #ece6d8; }
+  button.primary { background: #2c2520; color: #f5f0e8; border-color: #2c2520; }
+  button.primary:hover { background: #3d342d; }
+
+  .cards-grid {
+    max-width: 760px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .invite-card {
+    background: white;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #e0d8cc;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .card-top {
+    background: #2c2520;
+    padding: 20px 20px 16px;
+    text-align: center;
+  }
+
+  .event-title-card {
+    font-family: Georgia, serif;
+    font-size: 16px;
+    color: #f5f0e8;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+    font-weight: normal;
+  }
+
+  .event-subtitle {
+    font-size: 10px;
+    color: #a08878;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-family: Arial, sans-serif;
+  }
+
+  .card-body {
+    padding: 16px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .guest-info { flex: 1; }
+
+  .invite-label {
+    font-size: 9px;
+    color: #a09080;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+    font-family: Arial, sans-serif;
+  }
+
+  .guest-name {
+    font-family: Georgia, serif;
+    font-size: 19px;
+    color: #2c2520;
+    margin-bottom: 12px;
+    font-style: italic;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 5px;
+    font-size: 11px;
+    color: #5a4e44;
+    font-family: Arial, sans-serif;
+  }
+
+  .info-icon {
+    width: 14px;
+    height: 14px;
+    opacity: 0.45;
+    flex-shrink: 0;
+  }
+
+  .qr-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .qr-wrap canvas {
+    width: 80px !important;
+    height: 80px !important;
+    border: 1px solid #e0d8cc;
+    border-radius: 4px;
+    display: block;
+  }
+
+  .qr-hint {
+    font-size: 9px;
+    color: #a09080;
+    text-align: center;
+    line-height: 1.4;
+    font-family: Arial, sans-serif;
+    letter-spacing: 0.03em;
+  }
+
+  .card-footer {
+    border-top: 1px solid #f0ebe0;
+    padding: 9px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .guest-id {
+    font-size: 10px;
+    color: #c0b090;
+    font-family: monospace;
+    letter-spacing: 0.05em;
+  }
+
+  .seat-badge {
+    font-size: 10px;
+    background: #f5f0e8;
+    color: #2c2520;
+    border: 1px solid #c8b89a;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-family: Arial, sans-serif;
+    letter-spacing: 0.05em;
+  }
+
+  .no-guests {
+    text-align: center;
+    padding: 3rem;
+    color: #a09080;
+    font-size: 14px;
+    grid-column: 1 / -1;
+    font-family: Arial, sans-serif;
+  }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .controls { display: none !important; }
+    h1 { display: none; }
+    .cards-grid { max-width: 100%; gap: 8px; padding: 4mm; }
+    .invite-card { border: 1px solid #ddd; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Event Invitation Generator</h1>
+
+<div class="controls">
+  <p>Fill in the event details and guest list below. Click "Generate Invitations" to create a personalised QR code card for each guest. Use <strong>Ctrl+P</strong> (or <strong>⌘P</strong>) to print or save as PDF.</p>
+
+  <div class="field-row">
+    <div class="field-group">
+      <label>Event Name</label>
+      <input type="text" id="eventName" value="Annual Appreciation Dinner 2025" />
+    </div>
+    <div class="field-group">
+      <label>Subtitle</label>
+      <input type="text" id="eventSub" value="You are cordially invited" />
+    </div>
+  </div>
+
+  <div class="field-row">
+    <div class="field-group">
+      <label>Date</label>
+      <input type="text" id="eventDate" value="Saturday, 20 December 2025" />
+    </div>
+    <div class="field-group">
+      <label>Time</label>
+      <input type="text" id="eventTime" value="Doors open 6:30 PM · Dinner at 7:00 PM" />
+    </div>
+  </div>
+
+  <div class="field-row">
+    <div class="field-group full-width">
+      <label>Venue</label>
+      <input type="text" id="eventVenue" value="Grand Ballroom, Taipei Grand Hyatt" />
+    </div>
+  </div>
+
+  <div class="field-row">
+    <div class="field-group full-width">
+      <label>Apps Script deployment URL</label>
+      <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/YOUR_ID/exec" />
+    </div>
+  </div>
+
+  <div class="field-row">
+    <div class="field-group full-width">
+      <label>Guest list — one per line, format: ID, Name, Table</label>
+      <textarea id="guestList">G001,Sarah Johnson,A1
+G002,Michael Chen,A2
+G003,Emily Wang,B1
+G004,David Liu,B2
+G005,Jessica Lee,C1
+G006,Kevin Zhang,C2</textarea>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="primary" onclick="generateCards()">Generate Invitations</button>
+    <button onclick="window.print()">Print / Save as PDF</button>
+  </div>
+</div>
+
+<div class="cards-grid" id="output">
+  <div class="no-guests">Fill in the details above and click "Generate Invitations"</div>
+</div>
+
+<script>
+function generateCards() {
+  const eventName  = document.getElementById('eventName').value.trim();
+  const eventSub   = document.getElementById('eventSub').value.trim();
+  const eventDate  = document.getElementById('eventDate').value.trim();
+  const eventTime  = document.getElementById('eventTime').value.trim();
+  const eventVenue = document.getElementById('eventVenue').value.trim();
+  const scriptUrl  = document.getElementById('scriptUrl').value.trim();
+  const rawGuests  = document.getElementById('guestList').value.trim();
+
+  const guests = rawGuests.split('\n').filter(l => l.trim()).map(line => {
+    const parts = line.split(',');
+    return {
+      id:    (parts[0] || '').trim(),
+      name:  (parts[1] || 'Guest').trim(),
+      table: (parts[2] || '').trim(),
+    };
+  });
+
+  const output = document.getElementById('output');
+  output.innerHTML = '';
+
+  if (!guests.length) {
+    output.innerHTML = '<div class="no-guests">Please enter at least one guest.</div>';
+    return;
+  }
+
+  guests.forEach(g => {
+    const scanUrl = scriptUrl
+      ? `${scriptUrl}?id=${encodeURIComponent(g.id)}`
+      : `https://checkin.example.com/?id=${encodeURIComponent(g.id)}`;
+
+    const card = document.createElement('div');
+    card.className = 'invite-card';
+    card.innerHTML = `
+      <div class="card-top">
+        <div class="event-title-card">${eventName}</div>
+        <div class="event-subtitle">${eventSub}</div>
+      </div>
+      <div class="card-body">
+        <div class="guest-info">
+          <div class="invite-label">Dear Guest</div>
+          <div class="guest-name">${g.name}</div>
+          <div class="info-row">
+            <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            ${eventDate}
+          </div>
+          <div class="info-row">
+            <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg>
+            ${eventTime}
+          </div>
+          <div class="info-row">
+            <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            ${eventVenue}
+          </div>
+        </div>
+        <div class="qr-wrap">
+          <div id="qr-${g.id}"></div>
+          <div class="qr-hint">Scan to<br>check in</div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="guest-id">${g.id}</span>
+        ${g.table ? `<span class="seat-badge">Table ${g.table}</span>` : ''}
+      </div>
+    `;
+    output.appendChild(card);
+
+    new QRCode(document.getElementById('qr-' + g.id), {
+      text: scanUrl,
+      width: 80,
+      height: 80,
+      colorDark: '#2c2520',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  });
+}
+
+generateCards();
+</script>
+</body>
+</html>
