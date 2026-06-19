@@ -289,16 +289,7 @@ This worksheet automatically compiles the contact details of guests who register
 * Improves event follow-up efficiency and customer relationship management
 * Provides insights to improve future event attendance rates
 
-### Step 7 — Send emails via Power Automate
-
-1. Go to [flow.microsoft.com](https://flow.microsoft.com) and create a new instant cloud flow
-2. Trigger: **When an HTTP request is received**
-3. Add **Apply to each** → loop through guests array
-4. Add **Send an email (V2)** inside the loop using Outlook
-5. Copy the HTTP POST URL (webhook URL)
-6. Paste the webhook URL into the generator when clicking **Send Invitation Emails** or **Send Day-Before Reminder**
-
-### Step 8 – Google Apps Script Backend
+### Step 7 – Google Apps Script Backend
 
 1. Google Sheets → **Extensions → Apps Script**
 2. Paste the code from [`apps-script/Code.gs`](apps-script/Code.gs)
@@ -317,12 +308,21 @@ const EVENT_END   = new Date("2025-12-20T23:59:00+08:00");
 
 ---
 
-### Step 9 — Generate QR invitations
+### Step 8 — Generate QR invitations
 
 1. Open the Live Demo URL: https://ericattw.github.io/event-checkin-system/
 2. Paste the Apps Script deployment URL
 3. Enter guest list (`G001,Sarah Johnson,sarah@email.com,12345678,A1`)
 4. Click **Generate Invitations** → Print or save as PDF
+
+### Step 9 — Send emails via Power Automate (Optional)
+
+1. Go to [flow.microsoft.com](https://flow.microsoft.com) and create a new instant cloud flow
+2. Trigger: **When an HTTP request is received**
+3. Add **Apply to each** → loop through guests array
+4. Add **Send an email (V2)** inside the loop using Outlook
+5. Copy the HTTP POST URL (webhook URL)
+6. Paste the webhook URL into the generator when clicking **Send Invitation Emails** or **Send Day-Before Reminder**
 
 ---
 ### Step 10 — After the event
