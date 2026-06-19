@@ -8,9 +8,14 @@ A QR code-based event check-in system built with Google Sheets, Apps Script, and
 
 ## Business Use Case
 
-Manual attendance tracking often leads to long queues, duplicate entries, and inaccurate records.
+Manual guest check-in typically causes long queues, duplicate entries, and inaccurate records.
 
-This solution digitises the check-in process by enabling QR-based and manual backup check-ins, while providing real-time attendance reporting through Google Sheets dashboards.
+This system digitises the entire check-in workflow:
+- Guests receive a personalised QR code invitation via email (Power Automate + Outlook)
+- Staff scan QR codes on any mobile browser — no app required
+- Google Sheets updates instantly with check-in time, status, and arrival order
+- A live pivot table dashboard tracks attendance rate per table in real time
+- Manual check-in remains available as a backup to handle edge cases
 
 ---
 ## Skills Demonstrated
@@ -52,8 +57,8 @@ This solution digitises the check-in process by enabling QR-based and manual bac
 | Conditional formatting for visual check-in status | Checked-in rows turn green automatically |
 | Pivot table + chart | Live attendance rate per table, updates as guests arrive |
 | Duplicate scan alert | Prevents the same QR being scanned twice |
+| Email invitations & reminders | Send QR code invitations and day-before reminders via Power Automate + Outlook |
 | Time-window protection | Check-in endpoint only accepts requests during the event window |
-| 📧 Email invitations & reminders | Send QR code invitations and day-before reminders via Power Automate + Outlook |
 
 ---
 ### Check-in Methods
@@ -75,21 +80,21 @@ This backup process ensures attendance can still be recorded even if guests expe
 |----------|----------|----------|
 | A | guest_id | G001 |
 | B | name | Sarah Johnson |
-| C | email | xxx@email.com |
+| C | email | sarah@email.com |
 | D | mobile | 12345678 |
 | E | table | A1 |
 | F | time | 6/18/2026, 3:08:10 AM |
 | G | status | Checked in |
 | H | check_in_order | 5 |
-| J | pivot (Dashboard Helper Field) | checked in / tbc |
+| I | pivot (Helper Field) | checked in / tbc |
 | J | manual_check_in | ☑ / ☐ |
 | K | check_in_method | QR / Manual |
 | L | textjoin | text for QR generator |
 
 ### Conditional Formatting Rules
 
-- **Green row** — triggered when column J contains `"checked in"`  
-  Formula: `=FIND("checked in",$J2)`
+- **Green row** — triggered when column I contains `"checked in"`  
+  Formula: `=FIND("checked in",$I3)`
 - **Pending** — column J shows `"tbc"` for guests not yet arrived
 
 ### Summary sheet (Pivot Table + Chart)
