@@ -2,232 +2,81 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Event Invitation</title>
+<title>Event Invitation Generator</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, serif; background: #f5f0e8; padding: 2rem; color: #2c2520; }
+  h1 { text-align: center; font-size: 18px; color: #2c2520; margin-bottom: 0.5rem; font-weight: normal; letter-spacing: 0.05em; }
 
-  body {
-    font-family: Georgia, 'Times New Roman', serif;
-    background: #f5f0e8;
-    padding: 2rem;
-    color: #2c2520;
-  }
-
-  h1 {
-    text-align: center;
-    font-family: Georgia, serif;
-    font-size: 18px;
-    color: #2c2520;
-    margin-bottom: 0.5rem;
-    font-weight: normal;
-    letter-spacing: 0.05em;
-  }
-
-  .controls {
-    max-width: 760px;
-    margin: 0 auto 2rem;
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    border: 1px solid #e0d8cc;
-    font-family: Arial, sans-serif;
-  }
-
-  .controls p {
-    font-size: 13px;
-    color: #666;
-    margin-bottom: 1rem;
-    line-height: 1.6;
-  }
-
-  .field-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 12px;
-  }
-
+  .controls { max-width: 780px; margin: 0 auto 2rem; background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e0d8cc; font-family: Arial, sans-serif; }
+  .controls p { font-size: 13px; color: #666; margin-bottom: 1rem; line-height: 1.6; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
   .field-group { display: flex; flex-direction: column; gap: 4px; }
-  .field-group label { font-size: 12px; color: #888; font-family: Arial, sans-serif; }
-  .field-group input, .field-group textarea {
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 8px 10px;
-    font-size: 13px;
-    font-family: Arial, sans-serif;
-    color: #2c2520;
-    width: 100%;
-  }
+  .field-group label { font-size: 12px; color: #888; }
+  .field-group input, .field-group textarea { border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px; font-size: 13px; font-family: Arial, sans-serif; color: #2c2520; width: 100%; }
   .field-group textarea { min-height: 80px; resize: vertical; }
   .full-width { grid-column: 1 / -1; }
 
   .btn-row { display: flex; gap: 10px; margin-top: 1rem; flex-wrap: wrap; }
-
-  button {
-    padding: 9px 20px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-family: Arial, sans-serif;
-    cursor: pointer;
-    border: 1px solid #c8b89a;
-    background: #f5f0e8;
-    color: #2c2520;
-    transition: background 0.15s;
-  }
+  button { padding: 9px 18px; border-radius: 8px; font-size: 13px; font-family: Arial, sans-serif; cursor: pointer; border: 1px solid #c8b89a; background: #f5f0e8; color: #2c2520; transition: background 0.15s; display: flex; align-items: center; gap: 6px; }
   button:hover { background: #ece6d8; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
   button.primary { background: #2c2520; color: #f5f0e8; border-color: #2c2520; }
   button.primary:hover { background: #3d342d; }
+  button.email-btn { background: #1a56a0; color: white; border-color: #1a56a0; }
+  button.email-btn:hover { background: #154888; }
+  button.reminder-btn { background: #7c3aed; color: white; border-color: #7c3aed; }
+  button.reminder-btn:hover { background: #6d28d9; }
 
-  .cards-grid {
-    max-width: 760px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 8px; font-family: Arial, sans-serif; font-size: 13px; color: white; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; }
+  .toast.show { opacity: 1; }
+  .toast.success { background: #15803d; }
+  .toast.error { background: #b91c1c; }
+  .toast.info { background: #1a56a0; }
 
-  .invite-card {
-    background: white;
-    border-radius: 4px;
-    overflow: hidden;
-    border: 1px solid #e0d8cc;
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
+  /* Email modal */
+  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: white; border-radius: 12px; padding: 1.5rem; width: 90%; max-width: 500px; font-family: Arial, sans-serif; }
+  .modal h3 { font-size: 16px; margin-bottom: 1rem; color: #2c2520; }
+  .modal label { font-size: 12px; color: #888; display: block; margin-bottom: 4px; }
+  .modal input, .modal textarea { width: 100%; border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px; font-size: 13px; margin-bottom: 12px; font-family: Arial, sans-serif; }
+  .modal textarea { min-height: 90px; resize: vertical; }
+  .modal .btn-row { margin-top: 0.5rem; }
+  .modal-note { font-size: 11px; color: #999; background: #f9f6f0; border-radius: 6px; padding: 8px 10px; margin-bottom: 12px; line-height: 1.6; }
 
-  .card-top {
-    background: #2c2520;
-    padding: 20px 20px 16px;
-    text-align: center;
-  }
+  /* Status badge */
+  .status-row { display: flex; align-items: center; gap: 8px; margin-top: 0.5rem; font-size: 12px; color: #666; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; flex-shrink: 0; }
+  .dot.green { background: #15803d; }
+  .dot.red { background: #b91c1c; }
 
-  .event-title-card {
-    font-family: Georgia, serif;
-    font-size: 16px;
-    color: #f5f0e8;
-    letter-spacing: 0.1em;
-    margin-bottom: 4px;
-    font-weight: normal;
-  }
-
-  .event-subtitle {
-    font-size: 10px;
-    color: #a08878;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    font-family: Arial, sans-serif;
-  }
-
-  .card-body {
-    padding: 16px 20px;
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-  }
-
+  /* Cards */
+  .cards-grid { max-width: 780px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .invite-card { background: white; border-radius: 4px; overflow: hidden; border: 1px solid #e0d8cc; page-break-inside: avoid; break-inside: avoid; }
+  .card-top { background: #2c2520; padding: 20px 20px 16px; text-align: center; }
+  .event-title-card { font-family: Georgia, serif; font-size: 16px; color: #f5f0e8; letter-spacing: 0.1em; margin-bottom: 4px; font-weight: normal; }
+  .event-subtitle { font-size: 10px; color: #a08878; letter-spacing: 0.2em; text-transform: uppercase; font-family: Arial, sans-serif; }
+  .card-body { padding: 16px 20px; display: flex; gap: 14px; align-items: flex-start; }
   .guest-info { flex: 1; }
-
-  .invite-label {
-    font-size: 9px;
-    color: #a09080;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    margin-bottom: 3px;
-    font-family: Arial, sans-serif;
-  }
-
-  .guest-name {
-    font-family: Georgia, serif;
-    font-size: 19px;
-    color: #2c2520;
-    margin-bottom: 12px;
-    font-style: italic;
-  }
-
-  .info-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 5px;
-    font-size: 11px;
-    color: #5a4e44;
-    font-family: Arial, sans-serif;
-  }
-
-  .info-icon {
-    width: 14px;
-    height: 14px;
-    opacity: 0.45;
-    flex-shrink: 0;
-  }
-
-  .qr-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    flex-shrink: 0;
-  }
-
-  .qr-wrap canvas {
-    width: 80px !important;
-    height: 80px !important;
-    border: 1px solid #e0d8cc;
-    border-radius: 4px;
-    display: block;
-  }
-
-  .qr-hint {
-    font-size: 9px;
-    color: #a09080;
-    text-align: center;
-    line-height: 1.4;
-    font-family: Arial, sans-serif;
-    letter-spacing: 0.03em;
-  }
-
-  .card-footer {
-    border-top: 1px solid #f0ebe0;
-    padding: 9px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .guest-id {
-    font-size: 10px;
-    color: #c0b090;
-    font-family: monospace;
-    letter-spacing: 0.05em;
-  }
-
-  .seat-badge {
-    font-size: 10px;
-    background: #f5f0e8;
-    color: #2c2520;
-    border: 1px solid #c8b89a;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-family: Arial, sans-serif;
-    letter-spacing: 0.05em;
-  }
-
-  .no-guests {
-    text-align: center;
-    padding: 3rem;
-    color: #a09080;
-    font-size: 14px;
-    grid-column: 1 / -1;
-    font-family: Arial, sans-serif;
-  }
+  .invite-label { font-size: 9px; color: #a09080; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 3px; font-family: Arial, sans-serif; }
+  .guest-name { font-family: Georgia, serif; font-size: 19px; color: #2c2520; margin-bottom: 12px; font-style: italic; }
+  .info-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; font-size: 11px; color: #5a4e44; font-family: Arial, sans-serif; }
+  .info-icon { width: 14px; height: 14px; opacity: 0.45; flex-shrink: 0; }
+  .qr-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+  .qr-wrap canvas { width: 80px !important; height: 80px !important; border: 1px solid #e0d8cc; border-radius: 4px; display: block; }
+  .qr-hint { font-size: 9px; color: #a09080; text-align: center; line-height: 1.4; font-family: Arial, sans-serif; }
+  .card-footer { border-top: 1px solid #f0ebe0; padding: 9px 20px; display: flex; justify-content: space-between; align-items: center; }
+  .guest-id { font-size: 10px; color: #c0b090; font-family: monospace; }
+  .seat-badge { font-size: 10px; background: #f5f0e8; color: #2c2520; border: 1px solid #c8b89a; padding: 3px 10px; border-radius: 20px; font-family: Arial, sans-serif; }
+  .no-guests { text-align: center; padding: 3rem; color: #a09080; font-size: 14px; grid-column: 1/-1; font-family: Arial, sans-serif; }
 
   @media print {
     body { background: white; padding: 0; }
-    .controls { display: none !important; }
-    h1 { display: none; }
+    .controls, h1, .toast, .modal-backdrop { display: none !important; }
     .cards-grid { max-width: 100%; gap: 8px; padding: 4mm; }
-    .invite-card { border: 1px solid #ddd; }
   }
 </style>
 </head>
@@ -235,8 +84,36 @@
 
 <h1>Event Invitation Generator</h1>
 
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Email Modal -->
+<div class="modal-backdrop" id="emailModal">
+  <div class="modal">
+    <h3 id="modalTitle">📧 Send Invitation Emails</h3>
+    <div class="modal-note" id="modalNote">
+      This will trigger your Power Automate flow to send personalised invitation emails with QR codes to all guests via Outlook.
+    </div>
+    <label>Power Automate Webhook URL</label>
+    <input type="text" id="paWebhookUrl" placeholder="https://prod-xx.westus.logic.azure.com/workflows/..." />
+    <label>Sender name (shown in email)</label>
+    <input type="text" id="senderName" placeholder="e.g. Annual Dinner Organising Team" />
+    <label>Extra message (optional)</label>
+    <textarea id="extraMsg" placeholder="e.g. Please present your QR code at the entrance. Dress code: Smart Casual."></textarea>
+    <div class="btn-row">
+      <button class="email-btn" onclick="sendEmails()" id="sendEmailBtn">Send now</button>
+      <button onclick="closeModal()">Cancel</button>
+    </div>
+    <div class="status-row" id="emailStatus" style="display:none;">
+      <div class="dot" id="statusDot"></div>
+      <span id="statusText"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Controls -->
 <div class="controls">
-  <p>Fill in the event details and guest list below. Click "Generate Invitations" to create a personalised QR code card for each guest. Use <strong>Ctrl+P</strong> (or <strong>⌘P</strong>) to print or save as PDF.</p>
+  <p>Fill in the event details and guest list below. Generate invitation cards, send individual emails with QR codes, or schedule a reminder for the day before.</p>
 
   <div class="field-row">
     <div class="field-group">
@@ -248,7 +125,6 @@
       <input type="text" id="eventSub" value="You are cordially invited" />
     </div>
   </div>
-
   <div class="field-row">
     <div class="field-group">
       <label>Date</label>
@@ -259,36 +135,35 @@
       <input type="text" id="eventTime" value="Doors open 6:30 PM · Dinner at 7:00 PM" />
     </div>
   </div>
-
   <div class="field-row">
     <div class="field-group full-width">
       <label>Venue</label>
       <input type="text" id="eventVenue" value="Grand Ballroom, Taipei Grand Hyatt" />
     </div>
   </div>
-
   <div class="field-row">
     <div class="field-group full-width">
-      <label>Apps Script deployment URL</label>
+      <label>Apps Script deployment URL (for QR check-in)</label>
       <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/YOUR_ID/exec" />
     </div>
   </div>
-
   <div class="field-row">
     <div class="field-group full-width">
-      <label>Guest list — one per line, format: ID, Name, Table</label>
-      <textarea id="guestList">G001,Sarah Johnson,A1
-G002,Michael Chen,A2
-G003,Emily Wang,B1
-G004,David Liu,B2
-G005,Jessica Lee,C1
-G006,Kevin Zhang,C2</textarea>
+      <label>Guest list — one per line: ID, Name, Email, Table</label>
+      <textarea id="guestList">G001,Sarah Johnson,sarah@email.com,A1
+G002,Michael Chen,michael@email.com,A2
+G003,Emily Wang,emily@email.com,B1
+G004,David Liu,david@email.com,B2
+G005,Jessica Lee,jessica@email.com,C1
+G006,Kevin Zhang,kevin@email.com,C2</textarea>
     </div>
   </div>
 
   <div class="btn-row">
     <button class="primary" onclick="generateCards()">Generate Invitations</button>
-    <button onclick="window.print()">Print / Save as PDF</button>
+    <button onclick="window.print()">Print / Save PDF</button>
+    <button class="email-btn" onclick="openModal('invitation')">Send Invitation Emails</button>
+    <button class="reminder-btn" onclick="openModal('reminder')">Send Day-Before Reminder</button>
   </div>
 </div>
 
@@ -297,24 +172,133 @@ G006,Kevin Zhang,C2</textarea>
 </div>
 
 <script>
+// ── Helpers ──────────────────────────────────────────────────────
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function parseGuests() {
+  return document.getElementById('guestList').value.trim().split('\n')
+    .filter(l => l.trim()).map(line => {
+      const p = line.split(',');
+      return { id: (p[0]||'').trim(), name: (p[1]||'Guest').trim(),
+               email: (p[2]||'').trim(), table: (p[3]||'').trim() };
+    });
+}
+
+function getEventInfo() {
+  return {
+    name:   document.getElementById('eventName').value.trim(),
+    sub:    document.getElementById('eventSub').value.trim(),
+    date:   document.getElementById('eventDate').value.trim(),
+    time:   document.getElementById('eventTime').value.trim(),
+    venue:  document.getElementById('eventVenue').value.trim(),
+    script: document.getElementById('scriptUrl').value.trim(),
+  };
+}
+
+// ── Modal ─────────────────────────────────────────────────────────
+let currentMode = 'invitation';
+function openModal(mode) {
+  currentMode = mode;
+  const modal = document.getElementById('emailModal');
+  const title = document.getElementById('modalTitle');
+  const note  = document.getElementById('modalNote');
+  const btn   = document.getElementById('sendEmailBtn');
+  document.getElementById('emailStatus').style.display = 'none';
+
+  if (mode === 'invitation') {
+    title.textContent = 'Send Invitation Emails';
+    note.textContent = 'Triggers your Power Automate flow to send each guest a personalised email with their QR code embedded. Make sure your flow is set up and the webhook URL is correct.';
+    btn.textContent = 'Send invitations now';
+  } else {
+    title.textContent = 'Send Day-Before Reminder';
+    note.textContent = 'Triggers your Power Automate flow to send a reminder email to all guests 24 hours before the event. Same webhook URL — the flow detects the type from the payload.';
+    btn.textContent = 'Send reminders now';
+  }
+  modal.classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('emailModal').classList.remove('open');
+}
+
+document.getElementById('emailModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ── Send via Power Automate ───────────────────────────────────────
+async function sendEmails() {
+  const webhookUrl = document.getElementById('paWebhookUrl').value.trim();
+  const senderName = document.getElementById('senderName').value.trim();
+  const extraMsg   = document.getElementById('extraMsg').value.trim();
+
+  if (!webhookUrl) { showToast('Please enter your Power Automate webhook URL', 'error'); return; }
+
+  const guests = parseGuests();
+  if (!guests.length) { showToast('Please enter at least one guest', 'error'); return; }
+
+  const event = getEventInfo();
+  const btn = document.getElementById('sendEmailBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  const statusDiv  = document.getElementById('emailStatus');
+  const statusDot  = document.getElementById('statusDot');
+  const statusText = document.getElementById('statusText');
+  statusDiv.style.display = 'flex';
+  statusDot.className = 'dot';
+  statusText.textContent = `Sending to ${guests.length} guest(s)…`;
+
+  // Build payload for Power Automate
+  const payload = {
+    type: currentMode,           // 'invitation' or 'reminder'
+    sender_name: senderName,
+    extra_message: extraMsg,
+    event: event,
+    guests: guests.map(g => ({
+      id: g.id,
+      name: g.name,
+      email: g.email,
+      table: g.table,
+      qr_url: event.script
+        ? `${event.script}?id=${encodeURIComponent(g.id)}`
+        : `https://checkin.example.com/?id=${encodeURIComponent(g.id)}`
+    }))
+  };
+
+  try {
+    const res = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      statusDot.className = 'dot green';
+      statusText.textContent = `✓ Successfully triggered for ${guests.length} guest(s)`;
+      showToast(`${guests.length} invitation card(s) generated`, 'success');
+      setTimeout(closeModal, 2000);
+    } else {
+      throw new Error(`HTTP ${res.status}`);
+    }
+  } catch (err) {
+    statusDot.className = 'dot red';
+    statusText.textContent = `Error: ${err.message}. Check your webhook URL.`;
+    showToast('Failed to trigger Power Automate. Check the webhook URL.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = currentMode === 'invitation' ? 'Send invitations now' : 'Send reminders now';
+  }
+}
+
+// ── Generate Cards ────────────────────────────────────────────────
 function generateCards() {
-  const eventName  = document.getElementById('eventName').value.trim();
-  const eventSub   = document.getElementById('eventSub').value.trim();
-  const eventDate  = document.getElementById('eventDate').value.trim();
-  const eventTime  = document.getElementById('eventTime').value.trim();
-  const eventVenue = document.getElementById('eventVenue').value.trim();
-  const scriptUrl  = document.getElementById('scriptUrl').value.trim();
-  const rawGuests  = document.getElementById('guestList').value.trim();
-
-  const guests = rawGuests.split('\n').filter(l => l.trim()).map(line => {
-    const parts = line.split(',');
-    return {
-      id:    (parts[0] || '').trim(),
-      name:  (parts[1] || 'Guest').trim(),
-      table: (parts[2] || '').trim(),
-    };
-  });
-
+  const event  = getEventInfo();
+  const guests = parseGuests();
   const output = document.getElementById('output');
   output.innerHTML = '';
 
@@ -324,16 +308,16 @@ function generateCards() {
   }
 
   guests.forEach(g => {
-    const scanUrl = scriptUrl
-      ? `${scriptUrl}?id=${encodeURIComponent(g.id)}`
+    const scanUrl = event.script
+      ? `${event.script}?id=${encodeURIComponent(g.id)}`
       : `https://checkin.example.com/?id=${encodeURIComponent(g.id)}`;
 
     const card = document.createElement('div');
     card.className = 'invite-card';
     card.innerHTML = `
       <div class="card-top">
-        <div class="event-title-card">${eventName}</div>
-        <div class="event-subtitle">${eventSub}</div>
+        <div class="event-title-card">${event.name}</div>
+        <div class="event-subtitle">${event.sub}</div>
       </div>
       <div class="card-body">
         <div class="guest-info">
@@ -341,15 +325,15 @@ function generateCards() {
           <div class="guest-name">${g.name}</div>
           <div class="info-row">
             <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            ${eventDate}
+            ${event.date}
           </div>
           <div class="info-row">
             <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg>
-            ${eventTime}
+            ${event.time}
           </div>
           <div class="info-row">
             <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-            ${eventVenue}
+            ${event.venue}
           </div>
         </div>
         <div class="qr-wrap">
@@ -360,19 +344,17 @@ function generateCards() {
       <div class="card-footer">
         <span class="guest-id">${g.id}</span>
         ${g.table ? `<span class="seat-badge">Table ${g.table}</span>` : ''}
-      </div>
-    `;
+      </div>`;
     output.appendChild(card);
 
     new QRCode(document.getElementById('qr-' + g.id), {
-      text: scanUrl,
-      width: 80,
-      height: 80,
-      colorDark: '#2c2520',
-      colorLight: '#ffffff',
+      text: scanUrl, width: 80, height: 80,
+      colorDark: '#2c2520', colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.M
     });
   });
+
+  showToast(`${guests.length} invitation card(s) generated`, 'success');
 }
 
 generateCards();
