@@ -95,7 +95,7 @@ This backup process ensures attendance can still be recorded even if guests expe
 
 - **Green row** — triggered when column I contains `"checked in"`  
   Formula: `=FIND("checked in",$I3)`
-- **Pending** — column J shows `"tbc"` for guests not yet arrived
+- **Pending** — column I shows `"tbc"` for guests not yet arrived
 
 ### Summary sheet (Pivot Table + Chart)
 
