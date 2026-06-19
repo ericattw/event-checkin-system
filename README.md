@@ -81,8 +81,8 @@ This backup process ensures attendance can still be recorded even if guests expe
 | A | guest_id | G001 |
 | B | name | Sarah Johnson |
 | C | email | sarah@email.com |
-| D | mobile | 12345678 |
-| E | table | A1 |
+| D | table | A1 |
+| E | mobile | 12345678 |
 | F | time | 6/18/2026, 3:08:10 AM |
 | G | status | Checked in |
 | H | check_in_order | 5 |
@@ -158,16 +158,20 @@ The dashboard updates automatically as guests arrive, providing organisers with 
 ```text
 event-checkin-system/
 ├── apps-script/
-│   └── Code.gs                          # Google Apps Script backend (QR + Manual Check-in)
+│   └── Code.gs                           # Google Apps Script backend (QR + Manual Check-in)
 ├── images/
-│   ├── dashboard-checkedin-report.png   # Attendance dashboard
-│   ├── deployment.png                   # Apps Script deployment guide
-│   ├── invitation-generator.png         # Invitation generator interface
-│   ├── manual-checkedin.png             # Manual check-in workflow
-│   └── manual-checkedin-formatting.png  # Conditional formatting rules
-├── index.html                           # QR invitation generator
-└── README.md                            # Project documentation
+│   ├── dashboard-checkedin-report.png    # Attendance dashboard
+│   ├── deployment.png                    # Apps Script deployment guide
+│   ├── invitation-generator.png          # Invitation generator interface
+│   ├── manual-checkedin.png              # Manual check-in workflow
+│   ├── manual-checkedin-formatting.png   # Conditional formatting rules
+│   ├── Send-Invitation.png               # Invitation email generation workflow
+│   ├── Power-Automate-Flow.png           # Automated email reminder flow
+│   └── Email-output.png                  # Sample invitation email output
+├── index.html                            # QR invitation generator
+└── README.md                             # Project documentation
 ```
+
 ## ⚙️ Setup & Deployment (Quick Start)
 
 The deployment process takes less than 5 minutes. Click the section below for full step-by-step instructions.
@@ -182,7 +186,7 @@ The deployment process takes less than 5 minutes. Click the section below for fu
 3. Add these headers in row 1:
 
 ```
-guest_id | name | email | mobile | table | time | status | Check-in Order | pivot | manual_check_in | check_in_method | textjoin |
+guest_id | name | email | table | mobile | time | status | Check-in Order | pivot | manual_check_in | check_in_method | textjoin |
 ```
 
 4. Fill in guest data from row 2 onwards (columns F–K are auto-filled on check-in)
@@ -329,13 +333,18 @@ const EVENT_END   = new Date("2025-12-20T23:59:00+08:00");
 5. Copy the HTTP POST URL (webhook URL)
 6. Paste the webhook URL into the generator when clicking **Send Invitation Emails** or **Send Day-Before Reminder**
 
+![Send Invitation](images/Send-Invitation.png)
+
+![Power Automate Flow](images/Power-Automate-Flow.png)
+
+![Email output](images/Email-output.png)
+
 ---
 ### Step 10 — After the event
 
 Go to Apps Script → **Manage Deployments → Archive** to permanently disable the check-in endpoint. QR codes become inert immediately.
 
 ---
-
 
 </details>
 
