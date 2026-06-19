@@ -53,6 +53,7 @@ This solution digitises the check-in process by enabling QR-based and manual bac
 | Pivot table + chart | Live attendance rate per table, updates as guests arrive |
 | Duplicate scan alert | Prevents the same QR being scanned twice |
 | Time-window protection | Check-in endpoint only accepts requests during the event window |
+| 📧 Email invitations & reminders | Send QR code invitations and day-before reminders via Power Automate + Outlook |
 
 ---
 ### Check-in Methods
@@ -74,21 +75,22 @@ This backup process ensures attendance can still be recorded even if guests expe
 |----------|----------|----------|
 | A | guest_id | G001 |
 | B | name | Sarah Johnson |
-| C | mobile | 12345678 |
-| D | table | A1 |
-| E | time | 6/18/2026, 3:08:10 AM |
-| F | status | Checked in |
-| G | check_in_order | 5 |
-| H | pivot (Dashboard Helper Field) | checked in / tbc |
-| I | manual_check_in | ☑ / ☐ |
-| J | check_in_method | QR / Manual |
-| K | textjoin | text for QR generator |
+| C | email | xxx@email.com |
+| D | mobile | 12345678 |
+| E | table | A1 |
+| F | time | 6/18/2026, 3:08:10 AM |
+| G | status | Checked in |
+| H | check_in_order | 5 |
+| J | pivot (Dashboard Helper Field) | checked in / tbc |
+| J | manual_check_in | ☑ / ☐ |
+| K | check_in_method | QR / Manual |
+| L | textjoin | text for QR generator |
 
 ### Conditional Formatting Rules
 
-- **Green row** — triggered when column H contains `"checked in"`  
-  Formula: `=FIND("checked in",$H2)`
-- **Pending** — column H shows `"tbc"` for guests not yet arrived
+- **Green row** — triggered when column J contains `"checked in"`  
+  Formula: `=FIND("checked in",$J2)`
+- **Pending** — column J shows `"tbc"` for guests not yet arrived
 
 ### Summary sheet (Pivot Table + Chart)
 
@@ -175,36 +177,36 @@ The deployment process takes less than 5 minutes. Click the section below for fu
 3. Add these headers in row 1:
 
 ```
-guest_id | name | mobile | table | time | status | Check-in Order | pivot | manual_check_in | check_in_method | textjoin |
+guest_id | name | email | mobile | table | time | status | Check-in Order | pivot | manual_check_in | check_in_method | textjoin |
 ```
 
-4. Fill in guest data from row 2 onwards (columns E–H are auto-filled on check-in)
+4. Fill in guest data from row 2 onwards (columns F–K are auto-filled on check-in)
 
 ---
 
-### Step 2 — Helper column formula (column H)
+### Step 2 — Helper column formula (column I)
 
-In cell **H3**, enter and drag down to H100:
+In cell **I3**, enter and drag down to I100:
 
 ```
-=IF(F3="Checked in","checked in","tbc")
+=IF(G3="checked in","checked in","tbc")
 ```
 ---
 
-### Step 3 — Generate QR Payload (Column K)
+### Step 3 — Generate QR Payload (Column L)
 
 Create a helper field to generate the QR code payload.
 
-In cell `K3`:
+In cell `L3`:
 
 ```excel
-=TEXTJOIN(",",TRUE,$A3:$D3)
+=TEXTJOIN(",",TRUE,$A3:$E3)
 ```
 
 Example output:
 
 ```text
-G001,Sarah Johnson,12345678,A1
+G001,Sarah Johnson,sarah@email.com,12345678,A1
 ```
 
 This value is copied into the QR Code Generator and embedded into each guest's QR code.
@@ -213,11 +215,11 @@ Drag the formula down to generate QR payloads for all guests.
 
 ---
 
-### Step 4 – Conditional Formatting (Column H)
+### Step 4 – Conditional Formatting (Column I)
 
-1. Select range **A3:H100**
+1. Select range **A3:I100**
 2. Format → Conditional formatting → Add rule
-3. Custom formula: `=FIND("checked in",$H3)`
+3. Custom formula: `=IF(FIND("checked in",$I3),1,0)`
 4. Set fill colour to green → Done
 
 ---
@@ -287,8 +289,16 @@ This worksheet automatically compiles the contact details of guests who register
 * Improves event follow-up efficiency and customer relationship management
 * Provides insights to improve future event attendance rates
 
+### Step 7 — Send emails via Power Automate
 
-### Step 7 – Google Apps Script Backend
+1. Go to [flow.microsoft.com](https://flow.microsoft.com) and create a new instant cloud flow
+2. Trigger: **When an HTTP request is received**
+3. Add **Apply to each** → loop through guests array
+4. Add **Send an email (V2)** inside the loop using Outlook
+5. Copy the HTTP POST URL (webhook URL)
+6. Paste the webhook URL into the generator when clicking **Send Invitation Emails** or **Send Day-Before Reminder**
+
+### Step 8 – Google Apps Script Backend
 
 1. Google Sheets → **Extensions → Apps Script**
 2. Paste the code from [`apps-script/Code.gs`](apps-script/Code.gs)
@@ -307,15 +317,15 @@ const EVENT_END   = new Date("2025-12-20T23:59:00+08:00");
 
 ---
 
-### Step 8 — Generate QR invitations
+### Step 9 — Generate QR invitations
 
 1. Open the Live Demo URL: https://ericattw.github.io/event-checkin-system/
 2. Paste the Apps Script deployment URL
-3. Enter guest list (`G001, Sarah Johnson, A1`)
+3. Enter guest list (`G001,Sarah Johnson,sarah@email.com,12345678,A1`)
 4. Click **Generate Invitations** → Print or save as PDF
 
 ---
-### Step 9 — After the event
+### Step 10 — After the event
 
 Go to Apps Script → **Manage Deployments → Archive** to permanently disable the check-in endpoint. QR codes become inert immediately.
 
