@@ -337,8 +337,6 @@ const EVENT_END   = new Date("2025-12-20T23:59:00+08:00");
 
 ![Power Automate Flow](images/Power-Automate-Flow.png)
 
-![Email output](images/Email-output.png)
-
 ---
 ### Step 10 — After the event
 
