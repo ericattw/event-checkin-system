@@ -189,7 +189,7 @@ The deployment process takes less than 5 minutes. Click the section below for fu
 guest_id | name | email | table | mobile | time | status | Check-in Order | pivot | manual_check_in | check_in_method | textjoin |
 ```
 
-4. Fill in guest data from row 2 onwards (columns F–K are auto-filled on check-in)
+4. Fill in guest data from row 2 onwards (columns F–H, K are auto-filled on check-in)
 
 ---
 
@@ -209,13 +209,13 @@ Create a helper field to generate the QR code payload.
 In cell `L3`:
 
 ```excel
-=TEXTJOIN(",",TRUE,$A3:$E3)
+=TEXTJOIN(",",TRUE,$A3:$D3)
 ```
 
 Example output:
 
 ```text
-G001,Sarah Johnson,sarah@email.com,12345678,A1
+G001,Sarah Johnson,sarah@email.com,A1
 ```
 
 This value is copied into the QR Code Generator and embedded into each guest's QR code.
@@ -226,7 +226,7 @@ Drag the formula down to generate QR payloads for all guests.
 
 ### Step 4 – Conditional Formatting (Column I)
 
-1. Select range **A3:I100**
+1. Select range **A3:I101**
 2. Format → Conditional formatting → Add rule
 3. Custom formula: `=IF(FIND("checked in",$I3),1,0)`
 4. Set fill colour to green → Done
@@ -321,7 +321,7 @@ const EVENT_END   = new Date("2025-12-20T23:59:00+08:00");
 
 1. Open the Live Demo URL: https://ericattw.github.io/event-checkin-system/
 2. Paste the Apps Script deployment URL
-3. Enter guest list (`G001,Sarah Johnson,sarah@email.com,12345678,A1`)
+3. Enter guest list (`G001,Sarah Johnson,sarah@email.com,A1`)
 4. Click **Generate Invitations** → Print or save as PDF
 
 ### Step 9 — Send emails via Power Automate (Optional)
@@ -377,7 +377,6 @@ The check-in endpoint is also easy to shut down permanently after the event via 
 
 * Generate automated post-event attendance reports
 * Support multiple events within a single platform
-
 
 ## License
 MIT — free to use and adapt.
